@@ -1,11 +1,10 @@
 <?php
 /*
 Plugin Name: Star Wars Starships
-Description: A plugin to display Star Wars starships from the SWAPI. Use the shortcode [star_wars_starships] to display the starships table on any page or post.
+Description: A plugin to display Star Wars starships from the SWAPI. Admins can select a page to display the starships table in the plugin settings.
 Version: 1.0
 Author: Omer Elias
 */
-
 
 // Enqueue scripts and styles
 function sws_enqueue_scripts() {
@@ -50,6 +49,95 @@ function sws_display_starships(){
     $data .= '</tbody></table>';
     return $data;
 }
-add_shortcode('star_wars_starships', 'sws_display_starships');
+
+// Admin menu settings
+function sws_add_admin_menu() {
+    add_menu_page('Star Wars Starships Settings', 'Star Wars Settings', 'manage_options', 'star_wars_starships', 'sws_settings_page');
+}
+add_action('admin_menu', 'sws_add_admin_menu');
+
+function sws_settings_page() {
+    ?>
+    <div class="wrap">
+    <h1>Star Wars Plugin Settings</h1>
+    <form method="post" action="options.php">
+        <?php
+        settings_fields('sws_plugin_settings');
+        do_settings_sections('sws_plugin_settings');
+        submit_button();
+        ?>
+    </form>
+    </div>
+    <?php
+}
+
+function sws_settings_init() {
+    register_setting('sws_plugin_settings', 'sws_settings');
+
+    add_settings_section(
+        'sws_plugin_settings_section',
+        __('Select Page to Display Starships', 'wordpress'),
+        'sws_settings_section_callback',
+        'sws_plugin_settings'
+    );
+
+    add_settings_field(
+        'sws_select_page',
+        __('Select Page', 'wordpress'),
+        'sws_select_page_render',
+        'sws_plugin_settings',
+        'sws_plugin_settings_section'
+    );
+    
+    add_settings_field(
+        'sws_select_type',
+        __('Select data location:', 'wordpress'),
+        'sws_select_type_render',
+        'sws_plugin_settings',
+        'sws_plugin_settings_section'
+    );
+}
+add_action('admin_init', 'sws_settings_init');
+
+function sws_settings_section_callback() {
+    echo __('Please select the page where you want to display the Starships data.', 'wordpress');
+}
+
+function sws_select_page_render() {
+    $options = get_option('sws_settings');
+    ?>
+    <select name="sws_settings[sws_select_page]">
+        <?php
+        $pages = get_pages();
+        foreach ($pages as $page) {
+            $selected = (isset($options['sws_select_page']) && $options['sws_select_page'] === $page->ID) ? 'selected' : '';
+            echo '<option value="' . $page->ID . '" ' . $selected . '>' . $page->post_title . '</option>';
+        }
+        ?>
+    </select>
+    <?php
+}
+
+function sws_select_type_render() {
+    $options = get_option('sws_settings');
+    $type_options=['shortcode'=>'As a shortcode','content'=>'After The content'];
+    echo '<select name="sws_settings[sws_select_type]">';
+   foreach ($type_options as $value => $label) {
+    echo options['sws_select_type'];
+    $selected = (isset($options['sws_select_type']) && $options['sws_select_type'] === $value) ? 'selected' : '';
+    echo '<option value="' . $value . '">' . $label . '</option>';
+    }
+    echo '</select>';
+}
+
+function sws_insert_starships_into_page($content) {
+    $options = get_option('sws_settings');
+    if (is_page($options['sws_select_page'])) {
+        $starships_table = sws_display_starships();
+        $content .= $starships_table;
+    }
+    return $content;
+}
+add_filter('the_content', 'sws_insert_starships_into_page');
 
 ?>
