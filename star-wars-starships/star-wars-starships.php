@@ -11,7 +11,7 @@ Author: Omer Elias
 function sws_enqueue_scripts() {
     wp_enqueue_style('bootstrap-css', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css');
 }
-add_action('wp_enqueue_scripts', 'sws_enqueue_scripts');
+add_action('wp_enqueue_scripts', 'sws_enqueue_scripts'); 
 
 // Fetch Starships data
 function sws_fetch_starships(){
