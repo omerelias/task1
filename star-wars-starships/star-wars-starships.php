@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Star Wars Starships
-Description: A plugin to display Star Wars starships from the SWAPI. Admins can select a page to display the starships table in the plugin settings.
+Description: A plugin to display Star Wars starships from the SWAPI.
 Version: 1.0
 Author: Omer Elias
 */
@@ -122,13 +122,13 @@ function sws_select_type_render() {
     $options = get_option('sws_settings');
     $type_options=['shortcode'=>'As a shortcode','content'=>'After The content'];
     echo '<select name="sws_settings[sws_select_type]">';
-   foreach ($type_options as $value => $label) {
-    echo options['sws_select_type'];
+    foreach ($type_options as $value => $label) {
     $selected = (isset($options['sws_select_type']) && $options['sws_select_type'] === $value) ? 'selected' : '';
-    echo '<option value="' . $value . '">' . $label . '</option>';
+    echo '<option value="' . $value . '" '.$selected.'>' . $label . '</option>';
     }
     echo '</select>';
 }
+
 
 function sws_insert_starships_into_page($content) {
     $options = get_option('sws_settings');
@@ -138,6 +138,19 @@ function sws_insert_starships_into_page($content) {
     }
     return $content;
 }
-add_filter('the_content', 'sws_insert_starships_into_page');
+
+$type_option = get_option('sws_settings')['sws_select_type'];
+
+switch ($type_option) {
+    case 'content':
+        add_filter('the_content', 'sws_insert_starships_into_page');
+        break;
+    case 'shortcode':
+        add_shortcode('star_wars_starships', 'sws_display_starships');
+        break;
+    default:
+        break;
+}
+
 
 ?>
