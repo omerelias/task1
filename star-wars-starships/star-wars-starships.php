@@ -101,6 +101,7 @@ add_action('admin_init', 'sws_settings_init');
 
 function sws_settings_section_callback() {
     echo __('Please select the page where you want to display the Starships data.', 'wordpress');
+    echo __('For shortcode use [star_wars_starships].', 'wordpress');
 }
 
 function sws_select_page_render() {
